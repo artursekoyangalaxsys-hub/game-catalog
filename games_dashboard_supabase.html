@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Galaxsys Game Catalog</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14181f;
+    --panel: #1b212b;
+    --panel-2: #212835;
+    --line: #2c3442;
+    --ink: #eef1f6;
+    --ink-dim: #98a2b3;
+    --ink-faint: #5c6576;
+    --amber: #e7a13b;
+    --amber-dim: #6b5025;
+    --teal: #5fc7b9;
+    --rose: #d97b86;
+    --r: 10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(900px 500px at 85% -10%, #1f2a33 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Space Grotesk', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Fraunces', serif;}
+
+  /* Header */
+  header{
+    padding:48px 5vw 28px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:7px;height:7px;border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 0 4px var(--amber-dim);
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(32px, 4.2vw, 52px);
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+    line-height:1.05;
+  }
+  h1 em{font-style:italic; color:var(--amber); font-weight:500;}
+  header p.sub{
+    color:var(--ink-dim);
+    max-width:560px;
+    font-size:15px;
+    line-height:1.55;
+    margin:0;
+  }
+
+  .stat-row{
+    display:flex;
+    gap:0;
+    margin-top:32px;
+    border-top:1px solid var(--line);
+  }
+  .stat{
+    flex:1;
+    padding:18px 22px 0;
+    border-right:1px solid var(--line);
+  }
+  .stat:last-child{border-right:none;}
+  .stat .num{
+    font-family:'Fraunces', serif;
+    font-size:30px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .stat .lbl{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-top:2px;
+  }
+
+  /* Controls */
+  .controls{
+    padding:22px 5vw 0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+    position:sticky;
+    top:0;
+    background:rgba(20,24,31,0.92);
+    backdrop-filter:blur(8px);
+    z-index:10;
+    padding-bottom:18px;
+    border-bottom:1px solid transparent;
+  }
+  .controls.stuck{border-bottom-color:var(--line);}
+
+  .tabs{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .tab{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:.04em;
+    padding:9px 16px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--ink-dim);
+    cursor:pointer;
+    transition:all .15s ease;
+    white-space:nowrap;
+  }
+  .tab:hover{border-color:var(--amber-dim); color:var(--ink);}
+  .tab.active{
+    background:var(--amber);
+    border-color:var(--amber);
+    color:#1a1408;
+    font-weight:600;
+  }
+  .tab .count{opacity:.65; margin-left:5px;}
+  .tab.active .count{opacity:.55;}
+
+  .search-wrap{
+    margin-left:auto;
+    position:relative;
+    min-width:220px;
+    flex:1;
+    max-width:320px;
+  }
+  .search-wrap input{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:9px 14px 9px 34px;
+    border-radius:999px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:13.5px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .search-wrap input:focus{border-color:var(--amber-dim);}
+  .search-wrap input::placeholder{color:var(--ink-faint);}
+  .search-wrap svg{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    width:14px; height:14px; stroke:var(--ink-faint);
+  }
+
+  /* Table */
+  .table-wrap{
+    padding:22px 5vw 60px;
+    overflow-x:auto;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:880px;
+  }
+  thead th{
+    text-align:left;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    font-weight:500;
+    padding:0 16px 12px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    user-select:none;
+    white-space:nowrap;
+  }
+  thead th:hover{color:var(--ink-dim);}
+  thead th.sorted{color:var(--amber);}
+  thead th .arrow{margin-left:4px; opacity:.7; font-size:9px;}
+  tbody td{
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    font-size:13.5px;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  tbody tr{transition:background .12s ease;}
+  tbody tr:hover{background:var(--panel);}
+  tbody td.name{
+    font-weight:600;
+    color:var(--ink);
+    white-space:normal;
+    min-width:180px;
+  }
+  tbody td .uid{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color:var(--ink-faint);
+    margin-top:2px;
+    font-weight:400;
+  }
+  td.num, th.num{font-family:'JetBrains Mono', monospace;}
+
+  .pill{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-family:'JetBrains Mono', monospace;
+    border:1px solid var(--line);
+  }
+  .pill.yes{color:var(--teal); border-color:#2c4742; background:rgba(95,199,185,.08);}
+  .pill.no{color:var(--ink-faint);}
+  .pill.vol-low{color:#7fb88a;}
+  .pill.vol-medium{color:var(--amber);}
+  .pill.vol-high{color:var(--rose);}
+
+  .mult-bar-wrap{
+    display:flex; align-items:center; gap:8px;
+  }
+  .mult-track{
+    width:64px; height:5px; border-radius:3px;
+    background:var(--line); overflow:hidden; flex-shrink:0;
+  }
+  .mult-fill{
+    height:100%; background:linear-gradient(90deg, var(--amber-dim), var(--amber));
+    border-radius:3px;
+  }
+
+  .empty{
+    text-align:center; padding:60px 20px; color:var(--ink-faint);
+    font-family:'JetBrains Mono', monospace; font-size:13px;
+  }
+
+  footer{
+    padding:20px 5vw 40px;
+    color:var(--ink-faint);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  @media (max-width:720px){
+    header{padding:32px 5vw 22px;}
+    .stat-row{flex-wrap:wrap;}
+    .stat{flex:1 1 50%; border-right:none; border-bottom:1px solid var(--line); padding-bottom:14px;}
+    .controls{position:static;}
+    .search-wrap{max-width:none; order:3; flex-basis:100%;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow" id="liveStatus">Connecting to live data…</div>
+  <h1>Galaxsys <em>game</em> catalog</h1>
+  <p class="sub">Every slot, fast, branded, fishing and skill title in one place — IDs, RTP, max multipliers, volatility and release dates, kept in sync with the studio's working spreadsheet.</p>
+
+  <div class="stat-row" id="statRow"></div>
+</header>
+
+<div class="controls" id="controls">
+  <div class="tabs" id="tabs"></div>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="search" type="text" placeholder="Search by name or ID…" />
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead><tr id="theadRow"></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="emptyState" style="display:none;">No games match that search.</div>
+</div>
+
+<footer>
+  <span>Source: Galaxsys_Games_info.xlsx</span>
+  <span id="genTime"></span>
+</footer>
+
+<script>
+// ---- Supabase connection ----
+// Fill these in from your Supabase project: Settings -> API
+const SUPABASE_URL = 'https://sglalsulnuetbqxlbzet.supabase.co/rest/v1/';   // e.g. https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnbGFsc3VsbnVldGJxeGxiemV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjAzOTgsImV4cCI6MjA5ODM5NjM5OH0.ViXWb3wdhSNOVWbi1K3JkpfQk8PUDXGhqCRFVqGzNfg';
+
+let DATA = {};
+
+// column config per sheet_type: db field key, label, type (text/num/pct/pill/bool/date)
+const CONFIG = {
+  'Slot Games info': {
+    label: 'Slot Games',
+    cols: [
+      {k:'game_name', l:'Game', type:'name'},
+      {k:'default_rtp', l:'RTP', type:'pct'},
+      {k:'max_multiplier', l:'Max Mult.', type:'mult'},
+      {k:'lines', l:'Lines', type:'num'},
+      {k:'volatility', l:'Volatility', type:'vol'},
+      {k:'buy_bonus', l:'Buy Bonus', type:'bool'},
+      {k:'hit_frequency', l:'Hit Freq.', type:'pct'},
+      {k:'global_release_date', l:'Released', type:'date'},
+    ]
+  },
+  'Fast Games info': {
+    label: 'Fast Games',
+    cols: [
+      {k:'game_name', l:'Game', type:'name'},
+      {k:'category', l:'Category', type:'text'},
+      {k:'default_rtp', l:'RTP', type:'pct'},
+      {k:'min_multiplier', l:'Min Mult.', type:'text'},
+      {k:'max_multiplier', l:'Max Mult.', type:'mult'},
+      {k:'buy_bonus', l:'Buy Bonus', type:'bool'},
+      {k:'global_release_date', l:'Released', type:'date'},
+    ]
+  },
+  'Branded Games info': {
+    label: 'Branded',
+    cols: [
+      {k:'game_name', l:'Game', type:'name'},
+      {k:'default_rtp', l:'RTP', type:'pct'},
+      {k:'max_multiplier', l:'Max Mult.', type:'mult'},
+      {k:'lines', l:'Lines', type:'num'},
+      {k:'volatility', l:'Volatility', type:'vol'},
+      {k:'buy_bonus', l:'Buy Bonus', type:'bool'},
+    ]
+  },
+  'Fishing Games Info': {
+    label: 'Fishing',
+    cols: [
+      {k:'game_name', l:'Game', type:'name'},
+      {k:'default_rtp', l:'RTP', type:'pct'},
+      {k:'max_multiplier', l:'Max Mult.', type:'mult'},
+      {k:'buy_bonus', l:'Buy Bonus', type:'bool'},
+      {k:'global_release_date', l:'Released', type:'date'},
+    ]
+  },
+  'Skill Games info': {
+    label: 'Skill Games',
+    cols: [
+      {k:'game_name', l:'Game', type:'name'},
+      {k:'category', l:'Category', type:'text'},
+      {k:'production_id', l:'Prod. ID', type:'num'},
+    ]
+  },
+};
+
+const SHEET_ORDER = ['Slot Games info','Fast Games info','Branded Games info','Fishing Games Info','Skill Games info'];
+
+let activeSheet = SHEET_ORDER[0];
+let sortKey = null, sortDir = 1;
+let searchTerm = '';
+
+function parseMult(v){
+  if(!v) return 0;
+  const m = String(v).replace(/[^0-9.]/g,'');
+  return parseFloat(m) || 0;
+}
+function parsePct(v){
+  if(v === undefined || v === '' || v === null) return null;
+  let s = String(v).trim();
+  if(s.includes('%')) return parseFloat(s) || null;
+  let f = parseFloat(s);
+  if(isNaN(f)) return null;
+  return f <= 1 ? f*100 : f;
+}
+
+function renderStats(){
+  const totalGames = SHEET_ORDER.reduce((a,s)=> a+(DATA[s]||[]).length, 0);
+  const slotRows = DATA['Slot Games info']||[];
+  const maxRtp = Math.max(...SHEET_ORDER.flatMap(s=>(DATA[s]||[]).map(r=>{
+    const k = Object.keys(r).find(k=>k.toLowerCase().includes('rtp'));
+    return parsePct(r[k]) || 0;
+  })));
+  const buyBonusCount = SHEET_ORDER.flatMap(s=>(DATA[s]||[])).filter(r => String(r['buy_bonus']||'').toLowerCase().startsWith('y')).length;
+  const stats = [
+    {num: totalGames, lbl:'Total games'},
+    {num: SHEET_ORDER.filter(s=>(DATA[s]||[]).length).length, lbl:'Game categories'},
+    {num: maxRtp ? maxRtp.toFixed(1)+'%' : '—', lbl:'Highest RTP'},
+    {num: buyBonusCount, lbl:'With buy bonus'},
+  ];
+  document.getElementById('statRow').innerHTML = stats.map(s=>`
+    <div class="stat"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>
+  `).join('');
+}
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SHEET_ORDER.map(s=>{
+    const n = (DATA[s]||[]).length;
+    if(!n) return '';
+    return `<button class="tab ${s===activeSheet?'active':''}" data-sheet="${s}">${CONFIG[s].label}<span class="count">${n}</span></button>`;
+  }).join('');
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      activeSheet = t.dataset.sheet;
+      sortKey = null;
+      renderTabs();
+      renderTable();
+    });
+  });
+}
+
+function cellValue(row, col){
+  return row[col.k] ?? '';
+}
+
+function renderTable(){
+  const cfg = CONFIG[activeSheet];
+  const rows = DATA[activeSheet] || [];
+
+  // header
+  document.getElementById('theadRow').innerHTML = cfg.cols.map(c=>{
+    const isNum = ['num','pct','mult'].includes(c.type);
+    const sorted = sortKey === c.k;
+    return `<th class="${isNum?'num':''} ${sorted?'sorted':''}" data-key="${c.k}" data-type="${c.type}">${c.l}${sorted ? `<span class="arrow">${sortDir===1?'▲':'▼'}</span>` : ''}</th>`;
+  }).join('');
+
+  document.querySelectorAll('thead th').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const k = th.dataset.key;
+      if(sortKey === k){ sortDir *= -1; } else { sortKey = k; sortDir = 1; }
+      renderTable();
+    });
+  });
+
+  // filter
+  let filtered = rows;
+  if(searchTerm){
+    const t = searchTerm.toLowerCase();
+    filtered = rows.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(t)));
+  }
+
+  // sort
+  if(sortKey){
+    const col = cfg.cols.find(c=>c.k===sortKey);
+    filtered = [...filtered].sort((a,b)=>{
+      let av = cellValue(a,col), bv = cellValue(b,col);
+      if(col.type === 'mult'){ av = parseMult(av); bv = parseMult(bv); }
+      else if(col.type === 'pct'){ av = parsePct(av)||0; bv = parsePct(bv)||0; }
+      else if(col.type === 'num'){ av = parseFloat(av)||0; bv = parseFloat(bv)||0; }
+      else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+      if(av < bv) return -1*sortDir;
+      if(av > bv) return 1*sortDir;
+      return 0;
+    });
+  }
+
+  document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'block';
+
+  const maxMultGlobal = Math.max(...rows.map(r=>{
+    const mc = cfg.cols.find(c=>c.type==='mult');
+    return mc ? parseMult(r[mc.k]) : 0;
+  }), 1);
+
+  document.getElementById('tbody').innerHTML = filtered.map(r=>{
+    return '<tr>' + cfg.cols.map(c=>{
+      const v = cellValue(r,c);
+      if(c.type === 'name'){
+        const uid = r['unique_game_id'] || '';
+        return `<td class="name">${v}${uid ? `<span class="uid">${uid}</span>`:''}</td>`;
+      }
+      if(c.type === 'pct'){
+        const p = parsePct(v);
+        return `<td class="num">${p!==null ? p.toFixed(2)+'%' : (v||'—')}</td>`;
+      }
+      if(c.type === 'mult'){
+        const n = parseMult(v);
+        const pct = Math.min(100, (n / maxMultGlobal) * 100);
+        return `<td class="num"><div class="mult-bar-wrap"><span>${v||'—'}</span><div class="mult-track"><div class="mult-fill" style="width:${pct}%"></div></div></div></td>`;
+      }
+      if(c.type === 'bool'){
+        const yes = String(v).toLowerCase().startsWith('y');
+        return `<td><span class="pill ${yes?'yes':'no'}">${v || 'No'}</span></td>`;
+      }
+      if(c.type === 'vol'){
+        const cls = /high/i.test(v) ? 'vol-high' : /low/i.test(v) ? 'vol-low' : 'vol-medium';
+        return `<td><span class="pill ${cls}">${v||'—'}</span></td>`;
+      }
+      if(c.type === 'num'){
+        return `<td class="num">${v||'—'}</td>`;
+      }
+      return `<td>${v || '—'}</td>`;
+    }).join('') + '</tr>';
+  }).join('');
+}
+
+document.getElementById('search').addEventListener('input', e=>{
+  searchTerm = e.target.value;
+  renderTable();
+});
+
+window.addEventListener('scroll', ()=>{
+  document.getElementById('controls').classList.toggle('stuck', window.scrollY > 140);
+});
+
+document.getElementById('genTime').textContent = 'Loading…';
+
+async function loadData(){
+  const statusEl = document.getElementById('liveStatus');
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/games?select=*`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    DATA = {};
+    SHEET_ORDER.forEach(s => DATA[s] = []);
+    rows.forEach(r => {
+      if(!DATA[r.sheet_type]) DATA[r.sheet_type] = [];
+      DATA[r.sheet_type].push(r);
+    });
+    activeSheet = SHEET_ORDER.find(s => (DATA[s]||[]).length) || SHEET_ORDER[0];
+    statusEl.textContent = 'Live · connected to Supabase';
+    document.getElementById('genTime').textContent = 'Last loaded ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  }catch(err){
+    statusEl.textContent = 'Could not connect to Supabase — check SUPABASE_URL / key';
+    console.error(err);
+    document.getElementById('genTime').textContent = '';
+  }
+  renderStats();
+  renderTabs();
+  renderTable();
+}
+
+loadData();
+</script>
+
+</body>
+</html>
